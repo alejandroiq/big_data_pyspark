@@ -1,0 +1,137 @@
+Project Documentation: Google Play Store App Analysis
+
+Objective:
+To explore the cleaned Google Play Store dataset in Tableau and answer the following business questions:
+
+1. Is there a relationship between app size and rating?
+2. Can we identify underperforming categories (low installs, low ratings)?
+3. What genres tend to perform better in terms of user engagement (ratings)?
+
+---
+
+Technical Documentation
+
+1. Data Cleaning Steps (in PySpark):
+
+- Selected Columns:
+  - App, Category, Rating, Size, Installs, Price, Genres
+
+- Transformations Applied:
+  - App: Trimmed whitespace and converted to lowercase as App_clean
+  - Category: Trimmed and lowercased as Category_clean
+  - Genres: Extracted primary genre by splitting on ";"
+  - Rating: Filtered only numeric values using regex and cast to float
+  - Size: Converted values from "k" and "M" to MB (float). Set "Varies with device" to null. Renamed to Size_MB
+  - Installs: Removed "," and "+", then cast to integer
+  - Price: Removed "$" and cast to float
+
+- Dropping Duplicates:
+  - Used dropDuplicates() to remove exact duplicate rows.
+
+- Dropping Nulls:
+  - Used .na.drop() to drop rows with nulls in key cleaned columns.
+
+- Final Export:
+  - The cleaned DataFrame was written to a CSV using:
+    df_clean_SQL.coalesce(1).write.option("header", True).mode("overwrite").csv("/home/jovyan/output/clean_apps_data")
+
+  - The file was copied from the Docker container to the host using:
+    docker cp peaceful_galois:/home/jovyan/output/clean_apps_data C:\Users\aleja\pyspark-docker
+
+---
+
+2. Challenges Encountered & Solutions:
+
+- Invalid Ratings:
+  - Issue: Some ratings contained text like "navigation" or empty strings.
+  - Solution: Applied regex filter before casting to float.
+
+- PySpark output not visible:
+  - Issue: CSV output didn't appear in container root.
+  - Solution: Located under /home/jovyan/output; copied using docker cp from host.
+
+- Multiple part-files in CSV export:
+  - Solution: Used .coalesce(1) to create a single output file.
+
+- File access from Windows:
+  - Solution: Ensured Docker volume or used docker cp to move files to C:\Users\aleja\pyspark-docker
+
+---
+
+3. Limitations & Assumptions:
+
+- Assumed apps with Price = 0 are free and filtered out when focusing on paid apps.
+- Multi-genre entries were simplified by selecting only the first listed genre.
+- Ratings were assumed to be between 0.0 and 5.0.
+- No date-based filtering was applied due to missing cleaned date columns.
+
+---
+
+4. CRISP-DM Alignment in Jupyter Notebook:
+
+- Business Understanding: Defined three core business questions tied to user engagement and app performance.
+- Data Understanding: Explored schema, checked for nulls, distinct values, and column formats.
+- Data Preparation: Performed comprehensive cleaning in PySpark (as documented above).
+- Modeling: Not applicable (focus on EDA and visualization).
+- Evaluation: Early insights validated through notebook-based visualizations.
+- Deployment: Prepared final cleaned CSV for import into Tableau.
+
+---
+
+5. Dashboard Implementation (in Tableau)
+
+Design Overview:
+- Developed a multi-page, interactive Tableau dashboard with an intuitive navigation experience:
+  - Dashboard 1 serves as a welcome page with a bubble chart of category distribution and a rating parameter slider.
+  - Navigation buttons (e.g., “Let’s Start...”, “Next Dashboard...”) provide seamless movement across views.
+- A consistent visual theme was applied using Google’s color palette and branding elements (e.g., logo, font, layout).
+- Layouts were clean and balanced with clear spacing to enhance readability.
+
+Interactive Features:
+- Parameter controls:
+  - Minimum Rating Threshold (slider)
+- Filter controls:
+  - Dropdowns for App Type, Category_clean, and Genres
+  - Range slider for Rating
+- All charts are interactive and dynamically respond to user input across dashboards.
+
+Dashboard Highlights:
+- Dashboard 1: Intro screen with category bubble chart and rating selector parameter.
+- Dashboard 2: Scatterplot of Size vs. Rating, KPI tiles, histogram of installs, and summary stats.
+- Dashboard 3: Bar charts, price vs. rating heat map, and a tree map of top-rated categories.
+- Tooltips, hover interactions, and cross-dashboard filters enhance exploratory analysis.
+
+Dashboard Construction Process:
+
+Design Implementation:
+- Created a structured, multi-page dashboard to organize insights by business question.
+- Implemented an intuitive navigation system using action buttons across dashboards.
+- Applied a consistent theme inspired by Google branding: colors, font, and white-space layout.
+
+Interactivity Development:
+- Integrated dynamic parameter controls (e.g., minimum rating and install thresholds).
+- Designed filter panels for key dimensions like Category_clean and Genres.
+- Ensured smooth user transitions between dashboards via action filters and global dashboard filters.
+
+---
+
+6. Business Insights & Answers
+
+1. Is there a relationship between app size and rating?
+No strong relationship was identified between app size and user rating. Both small and large apps tend to center around a 4.2 average rating, suggesting that size does not meaningfully influence perceived quality.
+
+2. Can we identify underperforming categories (low installs, low ratings)?
+Yes. The data highlights that certain app categories underperform:
+- Low ratings: Notably seen in Dating, Maps & Navigation, and Video Players.
+- Low installs: Common among Events, Beauty, and Parenting apps.
+  These categories may benefit from improved user experience or marketing efforts.
+
+3. What genres tend to perform better in terms of user engagement (ratings)?
+The top-performing genres in terms of average rating are:
+- Education, followed by Action and Sports.
+  These genres consistently score higher on user satisfaction and engagement.
+
+
+7. LINK to Tableau
+
+https://public.tableau.com/views/Week5-M8-LAB/Welcome?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link
