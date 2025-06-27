@@ -1,4 +1,6 @@
-**PySpark Practice Series - Structured Exercises**
+============================================================
+PySpark Practice Series - Structured Exercises
+============================================================
 
 This project contains a series of practical exercises designed to build
 hands-on experience with PySpark, Spark SQL, RDDs, and DataFrame workflows.
